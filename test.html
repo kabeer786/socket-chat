@@ -1,0 +1,125 @@
+<html>
+   <head>
+   <style>
+  .chat
+  {
+	  border:2px groove #666;
+	  width:300px;
+	  height:450px;
+	  float:left;
+  }
+  #User
+  {
+	  	color: blue;
+		display: table;
+		position: absolute;
+		margin-top: -21px;
+		margin-left: 0px;
+		
+}
+	  
+ 
+  span 
+  {
+	  color:#903;
+  }
+  .offline
+  {
+	  color:#666;
+  }
+   .online
+  {
+	  color:#060;
+  }
+  .t1
+  {
+	  display:table-row;
+  }
+  
+   </style>
+      <script src="http://sys1:801/socket.io/socket.io.js"></script>
+      <script src="http://code.jquery.com/jquery-1.6.2.min.js"></script>
+      <script>
+         var name = '';
+		 var i = 0;
+    	 var socket = io.connect('http://sys1:801');
+			var users;
+$(document).ready(function () {
+
+    while (name == '') {
+        name = prompt("What's your name?", "");
+    }
+
+
+    socket.emit('register', name);
+	
+	$("#btn").live("click",function()
+	{
+		users=$(this).attr("hidden_user");
+		alert(users);
+		socket.emit('chat', $("input."+users).val());
+		//alert($("input#msg").val());
+		
+		$("div#"+users).append("<br />\r\n<span>" + name + ': ' + $("input."+users).val()+ "</span>");
+    	$("input."+users).val('');
+	});
+	
+	
+	
+	
+});
+
+
+socket.on('chat', function (data) 
+{
+    if (data.msgr == "User") 
+		{
+
+       		 $("div#data_recieved").append("<br />\r\n<a href='#' onClick=app('" + data.msg + "')><span id='" + data.msgr + "' class='online'>" + data.msgr + ': ' + data.msg + "</span></a>");
+    	} 
+		else 
+		{
+			var sent_user=$("div#"+data.msgr).attr("id");
+			
+			if(sent_user==data.msgr)
+			{
+				
+        	$("div#" + data.msgr).append("<br />\r\n<span id='" + data.msgr + "' class='online'>" + data.msgr + ': ' + data.msg + "</span>");
+			}
+			else
+			{
+				
+				app( data.msgr);
+  				$("div#" + data.msgr).append("<br />\r\n<span id='" + data.msgr + "' class='online'>" + data.msgr + ': ' + data.msg + "</span>");
+			}
+		}
+		
+		
+});
+
+socket.on('chatdis', function (data)
+{
+	 $("div#"+data.msgr).append("<br />\r\n<span id='" + data.msgr + "' class='offline'>" + data.msgr + ' is ' + data.msg + "</span>");
+
+});
+
+function app(user) 
+{
+
+	var chat = '<div class="chat "><div id="lbl">' + user + ':</div></br><input type="text" class="'+user+'"/><button id="btn" hidden_user="'+user+'" >Click me</button><div id="log"></div><div id="'+user+'"style="color:#099" sent_user="'+user+'" ></div></div>';
+
+    $(".t1").append(chat);
+}
+      </script>
+   </head>
+   <body>
+   <div class="t1">
+   <div class="chat">
+      <!--<input type="text" id="msg"/><button id="click" onClick="send()">Click me</button>-->
+      <div id="log"></div>
+      
+      <div id="data_recieved" style="color:#099"></div>
+       </div>
+      </div>
+   </body>
+</html>
